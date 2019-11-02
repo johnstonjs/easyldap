@@ -1,0 +1,9 @@
+# Set permissions for the Client systems
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 22-system_access.ldif
+#
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+# allow Clients access to userPassword for POSIX authentication
+add: olcAccess
+olcAccess: {3}to dn.children="ou=People,dc=example,dc=com" attrs=userPassword
+  by dn.exact="ou=Clients,dc=example,dc=com" read

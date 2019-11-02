@@ -1,0 +1,29 @@
+# Add an index to the mdb config
+# Uesr with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 40-index.ldif
+#
+## This file is an attempt to correct syslog errors of the form:
+## <= mdb_equality_candidates: (sudoHost) not indexed
+## <= mdb_inequality_candidates: (modifyTimestamp) not indexed
+## Where sudoHost or modifyTimestamp could be any LDAP attribute
+##
+## Reference: https://github.com/cveda/cveda_databank/issues/1
+#
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: uniqueMember eq
+-
+add: olcDbIndex
+olcDbIndex: sudoHost eq
+-
+add: olcDbIndex
+olcDbIndex: modifyTimeStamp eq
+-
+add: olcDbIndex
+olcDbIndex: mailacceptinggeneralid eq
+-
+add: olcDbIndex
+olcDbIndex: mail eq
+-
+add: olcDbIndex
+olcDbIndex: memberOf eq

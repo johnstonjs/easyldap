@@ -1,0 +1,58 @@
+# Configure logging on TheShire LDAP
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 01-logging.ldif
+#
+dn: cn=config
+changetype: modify
+#
+# loglevel <integer> [...]
+#              Specify the level at which debugging  statements  and  operation
+#              statistics   should   be  syslogged  (currently  logged  to  the
+#              syslogd(8)  LOG_LOCAL4  facility).   They  must  be   considered
+#              subsystems  rather  than  increasingly verbose log levels.  Some
+#              messages with higher  priority  are  logged  regardless  of  the
+#              configured  loglevel  as soon as any logging is configured.  Log
+#              levels are additive, and available levels are:
+#                     1      (0x1 trace) trace function calls
+#                     2      (0x2 packets) debug packet handling
+#                     4      (0x4 args) heavy trace debugging (function args)
+#                     8      (0x8 conns) connection management
+#                     16     (0x10 BER) print out packets sent and received
+#                     32     (0x20 filter) search filter processing
+#                     64     (0x40 config) configuration file processing
+#                     128    (0x80 ACL) access control list processing
+#                     256    (0x100  stats)   connections,   LDAP   operations,
+#                            results (recommended)
+#                     512    (0x200 stats2) stats log entries sent
+#                     1024   (0x400   shell)  print  communication  with  shell
+#                            backends
+#                     2048   (0x800 parse) entry parsing
+#
+#                     16384  (0x4000 sync) LDAPSync replication
+#                     32768  (0x8000  none)  only  messages  that  get   logged
+#                            whatever log level is set
+#              The  desired  log  level  can  be input as a single integer that
+#              combines the (ORed)  desired  levels,  both  in  decimal  or  in
+#              hexadecimal  notation,  as  a  list  of  integers (that are ORed
+#              internally), or as a list of the names that  are  shown  between
+#              parentheses, such that
+#
+#                  loglevel 129
+#                  loglevel 0x81
+#                  loglevel 128 1
+#                  loglevel 0x80 0x1
+#                  loglevel acl trace
+#
+#              are  equivalent.   The  keyword any can be used as a shortcut to
+#              enable logging at all levels (equivalent to  -1).   The  keyword
+#              none,  or  the  equivalent  integer representation, causes those
+#              messages that are logged regardless of the  configured  loglevel
+#              to  be  logged.   In  fact,  if loglevel is set to 0, no logging
+#              occurs, so at least the none level  is  required  to  have  high
+#              priority messages logged.
+#
+#              The  loglevel defaults to stats.  This level should usually also
+#              be included when using other  loglevels,  to  help  analyze  the
+#              logs.
+#
+replace: olcLogLevel
+olcLogLevel: stats

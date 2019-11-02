@@ -1,0 +1,6 @@
+# Load the refint module for referential integrity (needed for memberOf)
+# Use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 07-refint1.ldif
+#
+dn: cn=module{1},cn=config
+add: olcmoduleload
+olcmoduleload: refint

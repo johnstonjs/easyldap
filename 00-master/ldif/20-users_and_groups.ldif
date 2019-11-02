@@ -1,0 +1,102 @@
+# Initial population of LDAP Server
+# Use with ~$ ldapadd -x -D cn=admin,dc=... -W -f 20-users_and_groups.ldif
+#
+# Create an LDAP Suffix for User accounts
+dn: ou=People,dc=example,dc=com
+objectClass: organizationalUnit
+ou: People
+
+# Create an LDAP Suffix for posixGroup entries
+# These will be groups on Linux systems
+dn: ou=Groups,dc=example,dc=com
+objectClass: organizationalUnit
+ou: Groups
+
+# Create an LDAP Suffix for groupOfNames entires
+# These will be used for system access permissions
+dn: ou=Lists,dc=example,dc=com
+objectClass: organizationalUnit
+ou: Lists
+
+# Create an LDAP Group 'user1'
+# Group IDs (GID) will start at 10000
+dn: cn=user1,ou=Groups,dc=example,dc=com
+objectClass: posixGroup
+cn: user1
+gidNumber: 10000
+description: User One
+memberUid: user1
+
+# Create an LDAP Group `admin`
+# Note: This is a posixGroup which will show on Linux Clients as a system group
+#       It will not support memberOf lookups for access control via SSSD
+# Further: gidNumber will start at 15000 to allow each user to have their own
+#          posixGroup with matching uidNumber and gidNumber
+# Even Further: 'user1' is specified as a member of 'admin' and will have
+#               SUDO access on all Client systems
+dn: cn=admin,ou=Groups,dc=example,dc=com
+objectClass: posixGroup
+cn: admin
+gidNumber: 15000
+description: Admin Users
+memberUid: user1
+
+# Create an LDAP User `user1`
+# User IDs (UID) will start at 10000
+dn: uid=user1,ou=People,dc=example,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: postfixUser
+uid: user1
+sn: One
+givenName: User
+cn: User One
+displayName: User One
+uidNumber: 10000
+gidNumber: 10000
+# Passwords are created using the `slappasswd` utility and can be pasted here
+# Execute the following command to create a password
+# ~$ slappasswd -H {SSHA}
+#    Enter password when promted
+userPassword: {SSHA}a_bunch_of_characters_from_slappasswd
+gecos: User One
+loginShell: /bin/bash
+homeDirectory: /home/user1
+mail: user1@example.com
+mailacceptinggeneralid: user1
+maildrop: user1
+
+# Create an LDAP List 'linux'
+# Note: This is a groupofNames which will NOT show on Linux Clients
+#       It WILL support memberOf lookups, and will be used by SSSD for
+#       controlling Linux Client Access
+dn: cn=linux,ou=Lists,dc=example,dc=com
+objectClass: groupofNames
+cn: linux
+description: Linux Users
+member: uid=user1,ou=People,dc=example,dc=com
+
+# Create an LDAP List `git`
+# Note: This is a groupofNames which will NOT show on Linux Clients
+#       It WILL support memberOf lookups, and can be used by other
+#       supporting Clients such as Gitea or Gogs to control user access
+# Further: `user1` is specified as a member and will have access to any service
+#          configured to use this LDAP List for access
+dn: cn=git,ou=Lists,dc=example,dc=com
+objectClass: groupOfNames
+cn: git
+description: git Users
+member: uid=user1,ou=People,dc=example,dc=com
+
+# Create an LDAP List 'admin'
+# Note: This is a groupofNames which will NOT show on Linux Clients
+#       It WILL support memberOf lookups, and can be used by other
+#       supporting Clients such as Gitea or Gogs to control admin access
+# Further: `user1` is specified as a member and will have administrative access
+#          to any service configured to use this LDAP List for access
+dn: cn=admin,ou=Lists,dc=example,dc=com
+objectClass: groupOfNames
+cn: admin
+description: Admin Users
+member: uid=user1,ou=People,dc=example,dc=com

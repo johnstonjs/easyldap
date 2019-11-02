@@ -1,0 +1,30 @@
+# Set required conditions for TheShire LDAP
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 05-set_require.ldif
+#
+# require <conditions>
+#              Specify  a  set  of  conditions  (separated  by  white space) to
+#              require (default none).  The directive may be specified globally
+#              and/or  per-database;  databases  inherit  global conditions, so
+#              per-database specifications are additive.   bind  requires  bind
+#              operation   prior  to  directory  operations.   LDAPv3  requires
+#              session  to  be  using   LDAP   version   3.    authc   requires
+#              authentication  prior  to  directory  operations.  SASL requires
+#              SASL  authentication  prior  to  directory  operations.   strong
+#              requires  strong  authentication  prior to directory operations.
+#              The strong keyword allows protected "simple"  authentication  as
+#              well  as  SASL  authentication.   none may be used to require no
+#              conditions (useful to clear out globally set conditions within a
+#              particular  database);  it  must  occur  first  in  the  list of
+#              conditions.
+#
+dn: olcDatabase={-1}frontend,cn=config
+add: olcRequires
+olcRequires: bind LDAPv3 authc strong
+
+dn: olcDatabase={1}mdb,cn=config
+add: olcRequires
+olcRequires: bind LDAPv3 authc strong
+
+# Note: This LDIF appears to work properly, but creates two entries for
+# olcRequires in each of the databases
+# ~$ sudo slapcat -b olcDatabase={1}mdb,cn=config |grep olcRequires

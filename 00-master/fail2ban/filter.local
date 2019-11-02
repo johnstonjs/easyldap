@@ -1,0 +1,9 @@
+# /etc/fail2ban/filter.local
+#
+# Add the following lines to the above specified file to enble
+# fail2ban monitoring of failed logins for slapd
+#
+[slapd]
+enabled  = true
+port     = ldap.ldaps
+logpath  = /var/log/slapd.log

@@ -1,0 +1,36 @@
+# Configure TLS encryption on TheShire LDAP
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 03-configtls.ldif
+#
+dn: cn=config
+# TLSProtocolMin <major>[.<minor>]
+#              Specifies  minimum  SSL/TLS  protocol  version  that   will   be
+#              negotiated.   If  the  server  doesn't  support  at  least  that
+#              version, the SSL handshake will fail.  To  require  TLS  1.x  or
+#              higher, set this option to 3.(x+1), e.g.,
+#
+#                   TLSProtocolMin 3.2
+#
+#              would require TLS 1.1.  Specifying a minimum that is higher than
+#              that supported by the OpenLDAP implementation will result in  it
+#              requiring   the  highest  level  that  it  does  support.   This
+#              directive is ignored with GnuTLS.
+#
+add: olcTLSProtocolMin
+olcTLSProtocolMin: 3.4
+-
+# Set allowed TLS ciphers
+# Per slapd.conf man page:
+# TLSCipherSuite <cipher-suite-spec>
+#              Permits  configuring  what  ciphers  will  be  accepted  and the
+#              preference  order.   <cipher-suite-spec>  should  be  a   cipher
+#              specification  for  the  TLS library in use (OpenSSL, GnuTLS, or
+#              Mozilla NSS).  Example:
+#
+#                     OpenSSL:
+#                            TLSCipherSuite HIGH:MEDIUM:+SSLv2
+#
+#                     GnuTLS:
+#                            TLSCiphersuite SECURE256:!AES-128-CBC
+#
+add: olcTLSCipherSuite
+olcTLSCipherSuite: SECURE256:!AES-128-CBC

@@ -1,0 +1,22 @@
+# Load the memberOf module to easily check if a user is member of a given group
+# Use with ~$ sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f 06-memberof_config.ldif
+# Note: memberOf does not work with groups of type posixGroup, users will have
+# to maintain a separate List with groups of type groupOfNames to use memberOf
+#
+dn: cn=module,cn=config
+cn: module
+objectClass: olcModuleList
+olcModuleLoad: memberof
+olcModulePath: /usr/lib/ldap
+
+dn: olcOverlay={0}memberof,olcDatabase={1}mdb,cn=config
+objectClass: olcConfig
+objectClass: olcMemberOf
+objectClass: olcOverlayConfig
+objectClass: top
+olcOverlay: memberof
+olcMemberOfDangling: ignore
+olcMemberOfRefInt: TRUE
+olcMemberOfGroupOC: groupOfNames
+olcMemberOfMemberAD: member
+olcMemberOfMemberOfAD: memberOf

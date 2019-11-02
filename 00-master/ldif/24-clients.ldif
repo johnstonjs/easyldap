@@ -1,0 +1,22 @@
+# Create unique BindDN and Password for every Client system
+# Use with ~$ ldapadd -x -D cn=admin,dc=... -W -f 24-clients.ldif
+#
+# Create an LDAP Suffix for Client systems
+dn: ou=Clients,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Clients
+
+# Create a Client system `ubuntu1`
+dn: cn=ubuntu1,ou=Clients,dc=example,dc=com
+cn: ubuntu1
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+userPassword: {SSHA}generate_with_slappasswd
+
+# Create a Client system 'ubuntu2'
+dn: cn=ubuntu2,ou=Clients,dc=example,dc=com
+cn: ubuntu2
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+userPassword: {SSHA}generate_with_slappasswd

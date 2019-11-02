@@ -1,0 +1,43 @@
+# Configure SSL certificates for TheShire LDAP
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 02-letsencrypt.ldif
+#
+dn: cn=config
+# TLSCACertificateFile <filename>
+#              Specifies  the  file  that  contains certificates for all of the
+#              Certificate  Authorities  that  slapd   will   recognize.    The
+#              certificate  for  the CA that signed the server certificate must
+#              be included among these certificates. If the signing CA was  not
+#              a  top-level  (root) CA, certificates for the entire sequence of
+#              CA's from the signing CA to the top-level CA should be  present.
+#              Multiple certificates are simply appended to the file; the order
+#              is not significant.
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/letsencrypt/live/ldap.example.com/fullchain.pem
+-
+# TLSCertificateFile <filename>
+#              Specifies the file that contains the slapd server certificate.
+#
+add: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/letsencrypt/live/ldap.example.com/cert.pem
+-
+# TLSCertificateKeyFile <filename>
+#              Specifies  the  file  that contains the slapd server private key
+#              that matches the certificate stored  in  the  TLSCertificateFile
+#              file.   Currently,  the private key must not be protected with a
+#              password, so it is of critical importance that it  is  protected
+#              carefully.
+#
+add: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/letsencrypt/live/ldap.example.com/privkey.pem
+-
+# TLSCACertificatePath <path>
+#              Specifies the path of  a  directory  that  contains  Certificate
+#              Authority  certificates  in  separate  individual files. Usually
+#              only one of this  or  the  TLSCACertificateFile  is  used.  This
+#              directive is not supported when using GnuTLS.
+#
+# Note: This is likely ignored on TheShire LDAP as Ubuntu uses GnuTLS, but
+# is included for thoroughness
+#
+add: olcTLSCACertificatePath
+olcTLSCACertificatePath: /usr/share/ca-certificates/mozilla

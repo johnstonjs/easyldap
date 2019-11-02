@@ -1,0 +1,24 @@
+# Deny Anonymous BIND on TheShire LDAP
+# use with ~$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 04-bind_anon.ldif
+#
+# Following insertion, `ldapsearch` must be provided with the BINDDN password
+# Example: ~$ ldapsearch -D cn=admin,dc=... -x -W        
+#
+dn: cn=config
+changetype: modify
+# disallow <features>
+#              Specify a set of features (separated by white space) to disallow
+#              (default none).  bind_anon disables acceptance of anonymous bind
+#              requests.   Note  that  this setting does not prohibit anonymous
+#              directory access (See "require  authc").   bind_simple  disables
+#              simple   (bind)  authentication.   tls_2_anon  disables  forcing
+#              session to anonymous status (see also tls_authc)  upon  StartTLS
+#              operation  receipt.   tls_authc disallows the StartTLS operation
+#              if       authenticated       (see       also        tls_2_anon).
+#              proxy_authz_non_critical  disables  acceptance  of  the  proxied
+#              authorization  control  (RFC4370)  when  criticality  is  FALSE.
+#              dontusecopy_non_critical  disables acceptance of the dontUseCopy
+#              control (a work in progress) when criticality is FALSE.
+#
+add: olcDisallows
+olcDisallows: bind_anon
