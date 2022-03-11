@@ -11,6 +11,7 @@ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ldif/05-set_require.ldif
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/06-memberof_config.ldif
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ldif/07-refint1.ldif
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/08-refint2.ldif
+sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/09-ppolicy.ldif
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/10-openssh-lpk.ldif
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/11-sudo.ldif
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ldif/12-postfix.ldif

@@ -8,7 +8,7 @@ This guide contains scripts and configuration files to **easily**:
 5.  Cache User information on Client Systems to mitigate LDAP Server downtime
 6.  Create User Home Directories on first login to each Client System
 
-This configuration are intended for a small number of Users (< 100) with a
+This configuration is intended for a small number of Users (< 100) with a
 similar number of Groups.  It should be extensible beyond that, but has not
 been tested.
 
@@ -57,15 +57,14 @@ the Server and Client for encrypted connections.
 With much patience and perseverance, [OpenLDAP](https://openldap.org) can
 provide all of these capabilities using only packages available in modern
 Linux distributions.  All of the scripts and configurations in this guide have
-been tested against [Ubuntu](https://ubuntu.org) 18.04 and 19.04, as well as
-[Debian](https://debian.org) 10.
+been tested against [Ubuntu](https://ubuntu.org) 18.04, 19.04, and 20.04,
+as well as [Debian](https://debian.org) 10.
 
 ## Systems and Software
 
 For the purposes of this guide, the LDAP Server can be any **Linux system**
 with a **fully qualified domain name** and **accessible on port 636**.
-Scripts provided have only been tested on [Ubuntu](https://ubuntu.org) 18.04
-and 19.04, as well as [Debian](https://debian.org) 10.
+Scripts provided have only been tested on [Ubuntu](https://ubuntu.org) 18.04, 19.04, and 20.04 as well as [Debian](https://debian.org) 10.
 
 The configuration of OpenLDAP described here has been successfully tested
 on an [AWS](https://aws.amazon.com) EC2 instance with a static IP address, as
@@ -250,6 +249,35 @@ sudo setfacl -m u:openldap:r /etc/letsencrypt/live/ldap.example.com/cert.pem
 sudo setfacl -m u:openldap:r /etc/letsencrypt/live/ldap.example.com/privkey.pem
 ```
 
+Since Let'sEncrypt certificates are renewed regularly by Certbot, these
+permissions need to be reset following certificate renewal.  That can be done
+by creating a renewal post-hook in `/etc/letsencrypt/renewal-hooks/post`:
+```
+#!/bin/sh
+#
+# /etc/letsencrypt/renewal-hooks/post/reload_services_letsencrypt.sh
+#
+# Reload services that use LetsEncrypt certificates if the certificate is
+# renewed by certbot.  Only restarts the services if renewal is both
+# required and successful.
+#
+# To add additional services, enter additional lies with the form:
+#                systemctl reload *service_name*
+#                               or
+#                systemctl restart *service_name*
+# where *service_name* is the name of a service like nginx or dovecot
+
+# Restore permissions for LDAP server (slapd) to keys and restart
+setfacl -m u:openldap:rx /etc/letsencrypt/live
+setfacl -m u:openldap:rx /etc/letsencrypt/archive
+setfacl -m u:openldap:r /etc/letsencrypt/live/ldap.example.com/fullchain.pem
+setfacl -m u:openldap:r /etc/letsencrypt/live/ldap.example.com/cert.pem
+setfacl -m u:openldap:r /etc/letsencrypt/live/ldap.example.com/privkey.pem
+systemctl restart slapd
+```
+
+Ensure that the post-hook script is executable ('chmod a+x').
+
 Additionally, if your Linux distribution uses [AppArmor](https://en.wikipedia.org/wiki/AppArmor),
 you need to edit `/etc/apparmor.d/local/usr.sbin.slapd` to contain:
 ```
@@ -260,7 +288,7 @@ you need to edit `/etc/apparmor.d/local/usr.sbin.slapd` to contain:
 
 With all of these configurations in place, the Let'sEncrypt certificates should
 be accessible to *slapd* on modern Linux distributions.  These have been tested
-on Ubuntu 18.04, 19.04, and Debian 10.
+on Ubuntu 18.04, 19.04, 20.04, and Debian 10.
 
 During a later step we will configure *slapd* to load these certificates for
 encryption.  If you receive error code 80 at that time, it means that the
@@ -305,36 +333,38 @@ is useful for restricting access to various Client systems.
 enable the memberOf functionality.
 8.  [08-refint2.ldif](00-master/ldif/08-refint2.ldif): Loads another module
 required for memberOf functionality.
-9.  [10-openssh-lpk.ldif](00-master/ldif/10-openssh-lpk.ldif): Loads the
+9.  [09-ppolicy.ldif](00-master/ldif/09-ppolicy.ldif): Loads another module
+required for password policy functionality (avoids syslog errors).
+10.  [10-openssh-lpk.ldif](00-master/ldif/10-openssh-lpk.ldif): Loads the
 OpenSSH Public Key schema so that keys can be added for Users.
-10.  [11-sudo.ldif](00-master/ldif/11-sudo.ldif): Loads the SUDO schema so that
+12.  [11-sudo.ldif](00-master/ldif/11-sudo.ldif): Loads the SUDO schema so that
 SUDO rules can be managed on the LDAP Server for each User.
-11.  [12-postfix.ldif](00-master/ldif/12-postfix.ldif): Loads the schema for
+12.  [12-postfix.ldif](00-master/ldif/12-postfix.ldif): Loads the schema for
 mail routing so that Users can send/receive email.
-12.  [20-users_and_groups.ldif](00-master/ldif/20-users_and_groups.ldif):
+13.  [20-users_and_groups.ldif](00-master/ldif/20-users_and_groups.ldif):
 Populates users and groups for the LDAP Server.  **This file must be modified
 in MANY places to have the User and Group settings desired by the reader.**  The
 appropriate modifications should be intuitive from the comments but include
 setting the appropriate LDAP domain (*dc=example,dc=com*), User name (*user1*),
 and many other settings.
-13.  [21-import_ssh_pubkey.ldif](00-master/ldif/21-import_ssh_pubkey.ldif):
+14.  [21-import_ssh_pubkey.ldif](00-master/ldif/21-import_ssh_pubkey.ldif):
 Adds SSH Public Keys to the specified User.  **This file must be modified in
 MANY places to add the reader's SSH Public Keys**.  The appropriate modifications
 should be intuitive from the comments.
-14.  [22-system_access.ldif](00-master/ldif/22-system_access.ldif): Sets LDAP
+15.  [22-system_access.ldif](00-master/ldif/22-system_access.ldif): Sets LDAP
 access permissions so that Client systems can allow User authentication.  **This
 file must be modified in two places to point to the appropriate LDAP domain.**
 Replace the *dc=example,dc=com* as appropriate.
-15.  [23-sudo_rules.ldif](00-master/ldif/23-sudo_rules.ldif): Sets the SUDO
+16.  [23-sudo_rules.ldif](00-master/ldif/23-sudo_rules.ldif): Sets the SUDO
 rules for Client systems.  **This file must be modified in three places to point
 to the appropraite LDAP domain.**  Replace the *dc=example,dc=com* as
 appropriate.
-16.  [24-clients.ldif](00-master/ldif/24-clients.ldif): Creates a unique
+17.  [24-clients.ldif](00-master/ldif/24-clients.ldif): Creates a unique
 password for every Client system (so that they can be disabled individually if
 needed).  **This file must be modified in multiple places.**  The appropriate
 modiifcations should be intuitive from the examples and comments.
 Replace the *dc=example,dc=com* as appropriate.
-17.  [40-index.ldif](00-master/ldif/40-index.ldif):  Attempts to correct
+18.  [40-index.ldif](00-master/ldif/40-index.ldif):  Attempts to correct
 various system logging errors that complain about missing database indices.
 These errors seem to have no impact on system performance, but are easily
 corrected.
@@ -358,6 +388,18 @@ system failure.
 Log events generated by *slapd* can be sent to a dedicated log file if desired.
 An *rsyslog* configuration file is [provided](rsyslog/10-slapd.conf) with
 comments explaining how to implement.
+
+Previous versions of this LDAP configuration resulted in repeated log events
+regarding lack of database indices.  The file
+[40-index.ldif](00-master/ldif/40-index.ldif) has been updated
+extensively to avoid these.  Configuration can be easily seen be executing the
+command:
+```
+sudo cat /etc/ldap/slapd.d/cn=config/olcDatabase={1}mdb.ldif
+```
+
+This file should not be modified directly.  Further updates to indexing should
+be made through [40-index.ldif](00-master/ldif/40-index.ldif).
 
 ### LDAP Server Protection
 
@@ -385,7 +427,7 @@ as well as SSH keys.
 On every Client system, install the _sssd_ package and dependencies.
 
 ```
-sudo apt -y install sssd libpam-sss libnss-sss libsss-sudo
+sudo apt -y install sssd libpam-sss libnss-sss libsss-sudo sssd-tools
 ```
 
 ## Client Configuration
@@ -445,7 +487,9 @@ guide).
 [sssd]
 config_file_version = 2
 reconnection_retries = 3
-services = nss, pam, ssh, sudo
+# The services line is not needed in Ubuntu 20.04 and causes errors
+# Uncomment it for earlier versions
+# services = nss, pam, ssh, sudo
 domains = example
 
 [nss]
@@ -472,7 +516,7 @@ ldap_default_authtok = client_system_password
 ldap_group_search_base = ou=Groups,dc=example,dc=com
 ldap_group_member = memberUid
 ldap_user_ssh_public_key = sshPublicKey
-ldap_tls_reqceret = demand
+ldap_tls_reqcert = demand
 sudo_provider = ldap
 ldap_sudo_search_base = ou=SUDO,dc=example,dc=com
 access_provider = ldap

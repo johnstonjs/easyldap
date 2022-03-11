@@ -14,16 +14,34 @@ add: olcDbIndex
 olcDbIndex: uniqueMember eq
 -
 add: olcDbIndex
-olcDbIndex: sudoHost eq
+olcDbIndex: sudoHost eq, sub
 -
 add: olcDbIndex
 olcDbIndex: modifyTimeStamp eq
 -
 add: olcDbIndex
-olcDbIndex: mailacceptinggeneralid eq
+olcDbIndex: mailacceptinggeneralid eq,sub
 -
 add: olcDbIndex
-olcDbIndex: mail eq
+olcDbIndex: mail eq,sub
 -
 add: olcDbIndex
 olcDbIndex: memberOf eq
+-
+add: olcDbIndex
+olcDbIndex: uid eq
+-
+add: olcDbIndex
+olcDbIndex: objectClass eq
+-
+add: olcDbIndex
+olcDbIndex: memberUid eq
+-
+add: olcDbIndex
+olcDbIndex: cn eq
+-
+add: olcDbIndex
+olcDbIndex: gidNumber eq
+-
+add: olcDbIndex
+olcDbIndex: uidNumber eq

@@ -1,0 +1,13 @@
+# Load the the password policy module
+# Use with ~$ sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f 09-ppolicy.ldif
+#
+#
+# Intended to halt syslog errors such as:
+# slap_global_control: unrecognized control: 1.3.6.1.4.1.42.2.27.8.5.1
+# https://www.openldap.org/lists/openldap-software/200606/msg00024.html
+
+dn: cn=module,cn=config
+cn: module
+objectClass: olcModuleList
+olcModuleLoad: ppolicy
+olcModulePath: /usr/lib/ldap

@@ -55,4 +55,4 @@ changetype: modify
 #              logs.
 #
 replace: olcLogLevel
-olcLogLevel: parse
+olcLogLevel: none
