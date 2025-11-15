@@ -1,5 +1,8 @@
 # EasyLDAP: Easy Configuration of OpenLDAP for Linux User Authentication
 
+Update: Nov 2025 - I've switched to using [kanidm](https://github.com/kanidm/kanidm) for authentication and will no longer be maintaining this.
+
+
 This guide contains scripts and configuration files to **easily**:
 1.  Install the [OpenLDAP](https://openldap.org) Server
 2.  Encrypt LDAP traffic using [LetsEncrypt](https://letsencrypt.org) Certs
